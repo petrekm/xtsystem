@@ -300,7 +300,11 @@ namespace XTSystem
         class Path
                 {
 
-                    //public: static bool HasExtension(const String &path);
+				public: static bool HasExtension(const String &path)
+				{
+					String ext = GetExtension(path);
+					return ext.Length() > 1;
+				}
                     public: static bool IsPathRooted(const String &path)
                             {
                                 if (path.StartsWith(Path::DirectorySeparatorChar()) || path.StartsWith(Path::AltDirectorySeparatorChar())) return true;
@@ -374,7 +378,16 @@ namespace XTSystem
                         return ret;
                     }
 
-                    //public: static String GetExtension(const String &path);
+					public: static String GetExtension(const String &path)
+					{
+						String filename = GetFileName(path);
+						int i = filename.LastIndexOf(L'.');
+						String ext;
+						if (i >= 0) ext = filename.Substring(i);
+						if (ext.Length()>1) return ext;
+						return L"";
+					}
+
                     public: static String GetFileName(const String &path)
                     {
                         int k = Math::Max(path.LastIndexOf(DirectorySeparatorChar()), path.LastIndexOf(AltDirectorySeparatorChar()));
@@ -384,7 +397,18 @@ namespace XTSystem
 
                     
 
-                    //public: static String GetFileNameWithoutExtension(const String &path);
+					public: static String GetFileNameWithoutExtension(const String &path)
+					{
+						String filename = GetFileName(path);
+						int i = filename.LastIndexOf(L'.');
+						
+						if (i < filename.Length()-1)
+						{
+							filename = filename.Substring(0, i);
+						}
+						return filename;
+					}
+
                     //public: static String GetFullPath(const String &path);
                     //public: static String GetPathRoot(const String &path);
                     //public: static String GetRandomFileName();

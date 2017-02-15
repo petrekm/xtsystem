@@ -60,6 +60,8 @@ namespace testing
     TestsManager::MakeInfo(asdfqwer_success, sExpr, STR(A), sValA, L"", L"", L""); \
     } \
 }
+
+
 #define REQUIRE_FALSE(A) { \
     auto _A = (A); nChecks++; \
     bool asdfqwer_success = false; \

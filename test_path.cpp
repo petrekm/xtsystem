@@ -35,4 +35,24 @@ TEST_CASE(path_GetDirectoryName)
     REQUIRE(IO::Path::GetFileName(_T("C:\\MyDir\\MySubDir\\")), ==, _T(""));
     REQUIRE(IO::Path::GetFileName(_T("C:\\MyDir\\MySubDir")), ==, _T("MySubDir"));
  
+	REQUIRE_FALSE(IO::Path::HasExtension(_T("C:\\MyDir\\MySubDir")));
+	REQUIRE_TRUE(IO::Path::HasExtension(_T("C:\\MyDir\\MySubDir.exe")));
+
+	REQUIRE(IO::Path::GetExtension(_T("C:\\MyDir\\MySubDir")), == , _T(""));
+	REQUIRE(IO::Path::GetExtension(_T("C:\\MyDir\\MySubDir.")),==,_T(""));
+	REQUIRE(IO::Path::GetExtension(_T("C:\\MyDir\\MySubDir.exe")), == , _T(".exe"));
+	REQUIRE(IO::Path::GetExtension(_T("C:\\MyDir\\.")), == , _T(""));
+	REQUIRE(IO::Path::GetExtension(_T("C:\\MyDir\\..")), == , _T(""));
+	
+	REQUIRE_FALSE(IO::Path::HasExtension(_T("C:\\MyDir\\asd.")));
+	REQUIRE_FALSE(IO::Path::HasExtension(_T("C:\\MyDir\\.")));
+	REQUIRE_FALSE(IO::Path::HasExtension(_T("C:\\MyDir\\..")));
+
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\MySubDir")), == , _T("MySubDir"));
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\MySubDir.exe")), == , _T("MySubDir"));
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\MySubDir.")), == , _T("MySubDir."));
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\.")), == , _T("."));
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\..")), == , _T(".."));
+	REQUIRE(IO::Path::GetFileNameWithoutExtension(_T("C:\\MyDir\\")), == , _T(""));
+
 }

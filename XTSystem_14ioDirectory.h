@@ -1,3 +1,7 @@
+#undef GetCurrentDirectory
+#undef SetCurrentDirectory
+#undef CreateDirectory
+
 namespace XTSystem
 {
     namespace IO
@@ -20,6 +24,131 @@ namespace XTSystem
                 {
                     return GetFiles(path, _T("*"));
                 }
+
+			public: static bool Exists(const String &path)
+			{
+				DWORD ftyp = GetFileAttributesW(path.c_str());
+				if (ftyp == INVALID_FILE_ATTRIBUTES)
+					return false;  //something is wrong with your path!
+
+				if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+					return true;   // this is a directory!
+
+				return false;    // this is not a directory!
+			}
+
+			public: static String GetCurrentDirectory_()
+			{
+				TCHAR path[MAX_PATH + 1] = L"";
+				DWORD len = GetCurrentDirectoryW(MAX_PATH, path);
+
+				String value(path);
+				return value;
+			}
+
+			public: static void SetCurrentDirectory_(const String &path)
+			{
+				BOOL ok = SetCurrentDirectoryW(path.c_str());
+				if (ok != TRUE)
+				{
+					throw Exception(L"Can't set current directory");
+				}
+
+			}
+			//public: static String GetDirectoryRoot(const String &path)
+			//{
+
+			//}
+
+			public: static /*DirectoryInfo*/ void CreateDirectory_(const String &path)
+			{
+				BOOL ok = CreateDirectoryW(path.c_str(), NULL);
+				if (ok != TRUE)
+				{
+					throw Exception(L"Can't set current directory");
+				}
+			}
+
+			public: static void Delete(const String &path)
+			{
+				BOOL ok = RemoveDirectory(path.c_str());
+			}
+			//public: static void Delete(const String &path, bool recursive)
+			//{
+
+			//}
+
+/*			private: bool deleteDirectory(std::string& directoryname, int flags)
+			{
+				if (directoryname.at(directoryname.size() - 1) != '\\') directoryname += '\\';
+
+				if ((flags & CONTENTS) == CONTENTS)
+				{
+					WIN32_FIND_DATAA fdata;
+					HANDLE dhandle;
+					//BUG 1: Adding a extra \ to the directory name..
+					directoryname += "*";
+					dhandle = FindFirstFileA(directoryname.c_str(), &fdata);
+					//BUG 2: Not checking for invalid file handle return from FindFirstFileA
+					if (dhandle != INVALID_HANDLE_VALUE)
+					{
+						// Loop through all the files in the main directory and delete files & make a list of directories
+						while (true)
+						{
+							if (FindNextFileA(dhandle, &fdata))
+							{
+								std::string     filename = fdata.cFileName;
+								if (filename.compare("..") != 0)
+								{
+									//BUG 3: caused by BUG 1 - Removing too many characters from string.. removing 1 instead of 2
+									std::string filelocation = directoryname.substr(0, directoryname.size() - 1) + filename;
+
+									// If we've encountered a directory then recall this function for that specific folder.
+
+									//BUG 4: not really a bug, but spurious function call - we know its a directory from FindData already, use it.
+									if ((fdata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+										DeleteFileA(filelocation.c_str());
+									else
+										deleteDirectory(filelocation, DIRECTORY_AND_CONTENTS);
+								}
+							}
+							else if (GetLastError() == ERROR_NO_MORE_FILES)    break;
+						}
+						directoryname = directoryname.substr(0, directoryname.size() - 2);
+						//BUG 5: Not closing the FileFind with FindClose - OS keeps handles to directory open.  MAIN BUG
+						FindClose(dhandle);
+					}
+				}
+				if ((flags & DIRECTORY) == DIRECTORY)
+				{
+					HANDLE DirectoryHandle;
+					DirectoryHandle = CreateFileA(directoryname.c_str(),
+						FILE_LIST_DIRECTORY,
+						FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+						NULL,
+						OPEN_EXISTING,
+						FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+						NULL);
+					//BUG 6: Not checking CreateFileA for invalid handle return.
+					if (DirectoryHandle != INVALID_HANDLE_VALUE)
+					{
+
+						bool DeletionResult = (RemoveDirectoryA(directoryname.c_str()) != 0) ? true : false;
+						CloseHandle(DirectoryHandle);
+						return DeletionResult;
+					}
+					else
+					{
+						return true;
+					}
+				}
+
+				return true;
+			}
+*/
+
+			//public: static DirectoryInfo CreateDirectory(const String &path, DirectorySecurity directorySecurity);
+
 
             private: static bool IsFileOrLinkPriv(WIN32_FIND_DATA *ffd) { return (ffd->dwFileAttributes & ~FILE_ATTRIBUTE_DIRECTORY)!=0;}
             private: static bool IsDirectoryPriv(WIN32_FIND_DATA *ffd) { return (ffd->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)!=0;}
@@ -131,4 +260,9 @@ namespace XTSystem
 */
     }
 }
+
+
+#define GetCurrentDirectory GetCurrentDirectoryW
+#define SetCurrentDirectory SetCurrentDirectoryW
+#define CreateDirectory CreateDirectoryW
 

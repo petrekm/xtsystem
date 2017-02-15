@@ -399,6 +399,13 @@ private:
                 return s;
             }
 
+			std::string Tostdstring() const
+			{
+				std::string strValue;
+				strValue.assign(data.begin(), data.end());  // convert wstring to string
+				return strValue;
+			}
+
     friend std::basic_ostringstream<Char>&operator<<(std::basic_ostringstream<Char> &os, const String &d)
     {
         os << d.data;

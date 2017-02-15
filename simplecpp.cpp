@@ -480,7 +480,7 @@ int _tmain(int argc, _TCHAR* argv[])
     //DoTest();
     
 
-	Demo();
+	//Demo();
 
     //ProcessInfoDemo();
     

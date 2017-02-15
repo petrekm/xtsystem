@@ -196,6 +196,7 @@
     <ClCompile Include="test_generics.cpp" />
     <ClCompile Include="test_hresults.cpp" />
     <ClCompile Include="test_io.cpp" />
+    <ClCompile Include="test_iodirectory.cpp" />
     <ClCompile Include="test_math.cpp" />
     <ClCompile Include="test_path.cpp" />
     <ClCompile Include="test_random.cpp" />
