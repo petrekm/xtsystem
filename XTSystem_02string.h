@@ -20,6 +20,10 @@
 
 namespace XTSystem
 {
+	namespace Text
+	{
+		class StringBuilder;
+	}
     //enum_2(StringSplitOptions,None,RemoveEmptyEntries);
     //enum StringSplitOptions
     //{
@@ -549,6 +553,12 @@ public:
 
 private:
     std::wstring data;
+
+	void _reserve(size_t capacity)
+	{
+		data.reserve(capacity);
+	}
+	friend class Text::StringBuilder;
 };
 
 

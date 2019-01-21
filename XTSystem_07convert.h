@@ -5,40 +5,55 @@ namespace XTSystem
     {
     public:
         template<typename T> static String ToString(T defaultvalue) { return _T(""); }
-        template<> static String ToString(long defaultvalue) { return String::Format(_T("{0}"),defaultvalue); }
-        template<> static String ToString(double defaultvalue) { return String::Format(_T("{0}"),defaultvalue); }
-        template<> static String ToString(const String &defaultvalue) { return defaultvalue; }
-        template<> static String ToString(bool defaultvalue) { return (defaultvalue)?_T("True"):_T("False"); }
 
-		template<class T>static Char ToChar(const T &o) { return Character::Parse(o.ToString()); }
-		template<>static Char ToChar(const Char &o) { return o; }
+        //template<> 
+		static String ToString(long defaultvalue) { return String::Format(_T("{0}"),defaultvalue); }
+        //template<> 
+		static String ToString(double defaultvalue) { return String::Format(_T("{0}"),defaultvalue); }
+        //template<> 
+		static String ToString(const String &defaultvalue) { return defaultvalue; }
+        //template<> 
+		static String ToString(bool defaultvalue) { return (defaultvalue)?_T("True"):_T("False"); }
+
+		//template<class T>static Char ToChar(const T &o) { return Character::Parse(o.ToString()); }
+		//template<>
+		static Char ToChar(const Char &o) { return o; }
 
 		template<class T>static bool ToBoolean(const T &o) { return Bool::Parse(o.ToString()); }
-		template<>static bool ToBoolean(const bool &o) { return o; }
+		//template<>
+		static bool ToBoolean(const bool &o) { return o; }
 
 		template<class T>static double ToDouble(const T &o) { return Double::Parse(o.ToString()); }
-		template<>static double ToDouble(const double &o) { return o; }
+		//template<>
+		static double ToDouble(const double &o) { return o; }
 
-		template<class T>static float ToSingle(const T &o) { return Single::Parse(o.ToString()); }
-		template<>static float ToSingle(const float &o) { return o; }
+		//template<class T>static float ToSingle(const T &o) { return Single::Parse(o.ToString()); }
+		//template<>
+		static float ToSingle(const float &o) { return o; }
 
-		template<class T>static short ToInt16(const T &o) { return Int16::Parse(o.ToString()); }
-		template<>static short ToInt16(const short &o) { return o; }
+		//template<class T>static short ToInt16(const T &o) { return Int16::Parse(o.ToString()); }
+		//template<>
+		static short ToInt16(const short &o) { return o; }
 
 		template<class T>static int ToInt32(const T &o) { return Int32::Parse(o.ToString()); }
-		template<>static int ToInt32(const int &o) { return o; }
+		//template<>
+		static int ToInt32(const int &o) { return o; }
 
-		template<class T>static long long ToInt64(const T &o) { return Int64::Parse(o.ToString()); }
-		template<>static long long ToInt64(const long long &o) { return o; }
+		//template<class T>static long long ToInt64(const T &o) { return Int64::Parse(o.ToString()); }
+		//template<>
+		static long long ToInt64(const long long &o) { return o; }
 
-		template<class T>static unsigned short ToUInt16(const T &o) { return UInt16::Parse(o.ToString()); }
-		template<>static unsigned short ToUInt16(const short & o) { return o; }
+		//template<class T>static unsigned short ToUInt16(const T &o) { return UInt16::Parse(o.ToString()); }
+		//template<>
+		static unsigned short ToUInt16(const short & o) { return o; }
 
-		template<class T>static unsigned int ToUInt32(const T &o) { return UInt32::Parse(o.ToString()); }
-		template<>static unsigned int ToUInt32(const unsigned int &o) { return o; }
+		//template<class T>static unsigned int ToUInt32(const T &o) { return UInt32::Parse(o.ToString()); }
+		//template<>
+		static unsigned int ToUInt32(const unsigned int &o) { return o; }
 
-		template<class T>static unsigned long long ToUInt64(const T &o) { return UInt64::Parse(o.ToString()); }
-		template<>static unsigned long long ToUInt64(const long long &o) { return o; }
+		//template<class T>static unsigned long long ToUInt64(const T &o) { return UInt64::Parse(o.ToString()); }
+		//template<>
+		static unsigned long long ToUInt64(const long long &o) { return o; }
 
 /*
 
@@ -151,7 +166,7 @@ std::string base64_decode(std::string const& s);
 #include <iostream>
 
 int main() {
-  const std::string s = "ADP GmbH\nAnalyse Design & Programmierung\nGesellschaft mit beschränkter Haftung" ;
+  const std::string s = "ADP GmbH\nAnalyse Design & Programmierung\nGesellschaft mit beschrankter Haftung" ;
 
   std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
   std::string decoded = base64_decode(encoded);

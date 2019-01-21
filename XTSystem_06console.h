@@ -245,8 +245,8 @@ namespace XTSystem
 
     class Console
     {
-        private:
-			static const TCHAR* EndLine()
+
+	public: static const TCHAR* EndLine()
 			{
 #ifdef _WIN32
 				return _T("\r\n");
@@ -256,6 +256,7 @@ namespace XTSystem
 
 			}
 #ifdef _WIN32
+	private:
         class ConsoleState
         {
             HANDLE hstdin;
