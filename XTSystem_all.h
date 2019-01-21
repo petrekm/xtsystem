@@ -26,5 +26,7 @@
 #include "XTSystem_99temparg_end.h"
 #include "XTSystem_22hresults.h"
 #include "XTSystem_23drawing.h"
+#include "XTSystem_99zmacros.h"
+
 
 #pragma warning(default: 4482)

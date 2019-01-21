@@ -71,7 +71,9 @@ typedef unsigned long SIZE_T, *PSIZE_T;
 
 // If VC7 and later, then use the shipped 'dbghelp.h'-file
 #if _MSC_VER >= 1300
+#pragma warning(disable:4091)
 #include <dbghelp.h>
+#pragma warning(default:4091)
 #else
 // inline the important dbghelp.h-declarations...
 typedef enum {
@@ -685,12 +687,12 @@ protected:
     CHAR loadedImageName[STACKWALK_MAX_NAMELEN];
   } CallstackEntry;
 
-  typedef enum CallstackEntryType {firstEntry, nextEntry, lastEntry};
+  enum CallstackEntryType {firstEntry, nextEntry, lastEntry};
 
   virtual void OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName)
     {
       CHAR buffer[STACKWALK_MAX_NAMELEN];
-      _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%s', symOptions: %d, UserName: '%s'\n", szSearchPath, symOptions, szUserName);
+      _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%ws', symOptions: %d, UserName: '%ws'\n", szSearchPath, symOptions, szUserName);
       OnOutput(buffer);
       // Also display the OS-version
     #if _MSC_VER <= 1200
@@ -699,7 +701,7 @@ protected:
       ver.dwOSVersionInfoSize = sizeof(ver);
       if (GetVersionEx(&ver) != FALSE)
       {
-        _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%s)\n", 
+        _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%ws)\n", 
           ver.dwMajorVersion, ver.dwMinorVersion, ver.dwBuildNumber,
           ver.szCSDVersion);
         OnOutput(buffer);
@@ -711,7 +713,7 @@ protected:
 #pragma warning(disable: 4996)
       if (GetVersionEx( (OSVERSIONINFO*) &ver) != FALSE)
       {
-        _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%s) 0x%x-0x%x\n", 
+        _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%ws) 0x%x-0x%x\n", 
           ver.dwMajorVersion, ver.dwMinorVersion, ver.dwBuildNumber,
           ver.szCSDVersion, ver.wSuiteMask, ver.wProductType);
         OnOutput(buffer);
@@ -979,7 +981,7 @@ protected:
         CHAR     ModuleName[32];         // module name
         CHAR     ImageName[256];         // image name
         CHAR     LoadedImageName[256];   // symbol file name
-    };
+    } IMAGEHLP_MODULE64_V2_t;
 
 
       // SymCleanup()

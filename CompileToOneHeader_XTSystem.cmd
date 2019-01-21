@@ -30,6 +30,6 @@ type XTSystem_22hresults.h >> XTSystem.h
 type XTSystem_23drawing.h >>XTSystem.h
 
 type XTSystem_99temparg_end.h >> XTSystem.h
-
+type XTSystem_99zmacros.h >> XTSystem.h
 echo #pragma warning(default: 4482) >> XTSystem.h
 
