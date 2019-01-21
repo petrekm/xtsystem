@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "XTSystem_all.h"
 using namespace XTSystem;
+
+#ifdef XTSYSTEM_EXCEPTIONS_WITH_CALLSTACK
+#ifdef _WIN32
+
 using namespace Stack;
 
 void ProcessInfoDemo()
@@ -134,3 +138,7 @@ void TestStack()
     //TestExceptionWalking();
 
 }
+
+
+#endif
+#endif

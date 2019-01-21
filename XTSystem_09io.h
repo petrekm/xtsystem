@@ -472,7 +472,7 @@ namespace XTSystem
 			fread(buf, fsize, 1, f);
 			fclose(f);
 			buf[fsize] = 0;
-			String s = String::Convert_charsToString(buf);
+			String s = buf;
 			delete[]buf;
 
 			return s;

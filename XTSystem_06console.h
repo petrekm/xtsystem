@@ -1,15 +1,9 @@
 
 
-#define enum_16(NAME,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16) \
-class NAME \
-{ \
-public: \
-    static const int numItems = 10; \
-    typedef enum { T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16 } enumType; \
-    static const std::vector<String> &GetNames() { static std::vector<String> v; CALL_ONCE_BLOCK{ const Char* args[] = {_T(#T1),_T(#T2),_T(#T3),_T(#T4),_T(#T5),_T(#T6),_T(#T7),_T(#T8),_T(#T9),_T(#T10),_T(#T11),_T(#T12),_T(#T13),_T(#T14),_T(#T15),_T(#T16)}; v = std::vector<String>(args, args + numItems); } return v; }\
-    static const std::vector<enumType> &GetValues() { static std::vector<enumType> v; CALL_ONCE_BLOCK{ const enumType args[] = { T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16 }; v = std::vector<enumType>(args, args + numItems); } return v; }\
-    ENUM_IMPL(NAME,T1) \
-}; \
+#ifndef _WIN32
+#define _fputtc fputwc
+#define _fputts fputws
+#endif
 
 namespace XTSystem
 {
@@ -19,7 +13,7 @@ namespace XTSystem
     class ConsoleKey
     {
     public:
-        static const int numItems = 144;
+		static const int numItems() { return 144; }
         typedef enum
         {
             Backspace = 8,
@@ -186,7 +180,7 @@ namespace XTSystem
             _T("Oem1"), _T("OemPlus"), _T("OemComma"), _T("OemMinus"), _T("OemPeriod"), _T("Oem2"), _T("Oem3"), _T("Oem4"), _T("Oem5"), _T("Oem6"), _T("Oem7"), _T("Oem8"), _T("Oem102"),
             _T("Process"), _T("Packet"), _T("Attention"), _T("CrSel"), _T("ExSel"), _T("EraseEndOfFile"), _T("Play"), _T("Zoom"),
             _T("NoName"), _T("Pa1"), _T("OemClear")
-        }; v = std::vector<String>(args, args + numItems); } return v; }
+        }; v = std::vector<String>(args, args + numItems()); } return v; }
 
         static std::vector<enumType> GetValues() { static std::vector<enumType> v; CALL_ONCE_BLOCK{ const enumType args[] = {
             Backspace, Tab, Clear, Enter, Pause, Escape, Spacebar, PageUp,
@@ -205,11 +199,12 @@ namespace XTSystem
             MediaPlay, LaunchMail, LaunchMediaSelect, LaunchApp1, LaunchApp2,
             Oem1, OemPlus, OemComma, OemMinus, OemPeriod, Oem2, Oem3, Oem4, Oem5, Oem6, Oem7, Oem8, Oem102,
             Process, Packet, Attention, CrSel, ExSel, EraseEndOfFile, Play, Zoom,
-            NoName, Pa1, OemClear }; v = std::vector<enumType>(args, args + numItems); } return v;
+            NoName, Pa1, OemClear }; v = std::vector<enumType>(args, args + numItems()); } return v;
         }
         ENUM_IMPL(ConsoleKey, Backspace)
     };
 
+#ifdef _WIN32
     struct ConsoleKeyInfo
     {
         public: 
@@ -246,10 +241,21 @@ namespace XTSystem
             ConsoleModifiers m_modifs;
     };
 
+#endif
+
     class Console
     {
         private:
+			static const TCHAR* EndLine()
+			{
+#ifdef _WIN32
+				return _T("\r\n");
+#else
+				return _T("\n");
+#endif
 
+			}
+#ifdef _WIN32
         class ConsoleState
         {
             HANDLE hstdin;
@@ -292,8 +298,12 @@ namespace XTSystem
 
         };
 
+#endif
+
+
         public:
 
+#ifdef _WIN32
             static ConsoleColor ForeGroundColor()
             {
                 return GetConsoleState().GetForeGroundColor();
@@ -312,6 +322,7 @@ namespace XTSystem
             {
                 GetConsoleState().SetBackGroundColor(color);
             }
+#endif
 
             static void Write(const Char &c) { _fputtc(c,stdout); }
             static void Write(const String &s) { _fputts(s.c_str(),stdout); }
@@ -326,9 +337,9 @@ namespace XTSystem
             TEMP_ARG_9 static void Write(const String &text, TCREF_ARG_9) { Write(String::Format(text,ARG_9)); }
             TEMP_ARG_10 static void Write(const String &text, TCREF_ARG_10) { Write(String::Format(text,ARG_10)); }
 
-            static void WriteLine(const Char &c) { _fputtc(c,stdout); _fputtc(_T('\n'),stdout);}
-            static void WriteLine() { _fputts(_T("\n"),stdout); }
-            static void WriteLine(const String &s) { _fputts(s.c_str(),stdout); _fputtc(_T('\n'),stdout);  }
+            static void WriteLine(const Char &c) { _fputtc(c,stdout); _fputts(EndLine(),stdout);}
+            static void WriteLine() { _fputts(EndLine(),stdout); }
+            static void WriteLine(const String &s) { _fputts(s.c_str(),stdout); _fputts(EndLine(),stdout);  }
             TEMP_ARG_1 static void WriteLine(const String &text, TCREF_ARG_1) { WriteLine(String::Format(text,ARG_1)); }
             TEMP_ARG_2 static void WriteLine(const String &text, TCREF_ARG_2) { WriteLine(String::Format(text,ARG_2)); }
             TEMP_ARG_3 static void WriteLine(const String &text, TCREF_ARG_3) { WriteLine(String::Format(text,ARG_3)); }
@@ -344,10 +355,11 @@ namespace XTSystem
                 Char A[2000];
                 _fgetts( A, sizeof(A), stdin);
                 String line = A;
-                line = line.TrimEnd(_T("\r\n"));
+                line = line.TrimEnd(EndLine());
                 return line;
             }
 
+#ifdef _WIN32
             //bool KeyAvailable() const   // property
             //{
             //    int i = _kbhit();
@@ -370,6 +382,7 @@ namespace XTSystem
             static ConsoleState state;
             return state;
         }
+#endif
     };
 }
 

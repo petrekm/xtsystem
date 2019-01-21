@@ -1,3 +1,9 @@
+#ifndef _WIN32
+
+#include "float.h"
+#define _tcstod wcstod
+#define _tcstol wcstol
+#endif
 
 namespace XTSystem
 {

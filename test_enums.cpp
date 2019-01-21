@@ -45,12 +45,12 @@ String EnumNamesToString(const std::vector<String> &v)
 TEST_CASE(enum_test)
 {
     en1 x1;
-    REQUIRE(x1.numItems,==,1)
+    REQUIRE(x1.numItems(),==,1)
     REQUIRE(x1,==,en1::en11)
     REQUIRE(EnumNamesToString(x1.GetNames()),==,_T("en11,"));
 
     en2 x2;
-    REQUIRE(x2.numItems,==,2)
+    REQUIRE(x2.numItems(),==,2)
     REQUIRE(x2,==,en2::en21)
     REQUIRE(EnumNamesToString(x2.GetNames()),==,_T("en21,en22,"));
 

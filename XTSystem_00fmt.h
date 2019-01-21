@@ -10,24 +10,25 @@
     #endif
 #endif
 
-#include <cassert>
-#include <climits>
+
+
+#include <cmath>
+#include <cctype>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
-#include <algorithm>
-#include <iterator>
-#include <limits>
-#include <stdexcept>
-#include <string>
-#include <sstream>
-#include <cctype>
-#include <math.h>
+#include <climits>
+#include <cassert>
 #include <cstdarg>
-#include <vector>
+#include <stdexcept>
+#include <algorithm>
+
+#ifdef _WIN32
+#include <iterator>	
 #include <time.h>
 #include <windows.h>
 #include <tchar.h>
+#endif 
 
 #ifdef __GNUC__
 # define FMT_GCC_VERSION (__GNUC__ * 100 + __GNUC_MINOR__)
@@ -78,7 +79,52 @@ namespace XTSystem_fmt {
 FMT_GCC_EXTENSION typedef long long LongLong;
 FMT_GCC_EXTENSION typedef unsigned long long ULongLong;
 
+
+class FormatError : public std::runtime_error {
+ public:
+  explicit FormatError(const std::string &message)
+  : std::runtime_error(message) {}
+};
+
+
 namespace internal {
+
+		struct Internal
+		{
+			static void ReportUnknownType(char code, const char*type)
+			{
+			    char buff[100];
+			    std::string x;
+			    if (std::isprint(static_cast<unsigned char>(code))) 
+			    {
+				sprintf_s(buff, "unknown format code '%c' for %s", code, type);
+			    }	else
+			    {
+				sprintf_s(buff, "unknown format code '\\x%2x' for %s", static_cast<unsigned>(code), type);
+			    }
+			
+			    
+			    x = buff;
+			    throw XTSystem_fmt::FormatError(x);
+			}
+		};
+
+
+struct Constants
+{
+
+static const char *DIGITS()
+{
+	static const char values[] =
+    "0001020304050607080910111213141516171819"
+    "2021222324252627282930313233343536373839"
+    "4041424344454647484950515253545556575859"
+    "6061626364656667686970717273747576777879"
+    "8081828384858687888990919293949596979899";
+	return values;
+}
+
+};
 
 #if _SECURE_SCL
 template <typename T>
@@ -265,52 +311,6 @@ inline unsigned CountDigits(uint64_t n) {
 }
 
 
-struct Constants
-{
-//#define FMT_POWERS_OF_10(factor) \
-//  factor * 10, \
-//  factor * 100, \
-//  factor * 1000, \
-//  factor * 10000, \
-//  factor * 100000, \
-//  factor * 1000000, \
-//  factor * 10000000, \
-//  factor * 100000000, \
-//  factor * 1000000000
-//
-//static const uint32_t *POWERS_OF_10_32()
-//{
-//
-// static const uint32_t values[] = {0, FMT_POWERS_OF_10(1)};
-// return values;
-//
-//}
-//static const uint64_t *POWERS_OF_10_64()
-//{
-//	static const uint64_t values[] = {
-//  0,
-//  FMT_POWERS_OF_10(1),
-//  FMT_POWERS_OF_10(fmt::ULongLong(1000000000)),
-//  // Multiply several constants instead of using a single long long constants
-//  // to avoid warnings about C++98 not supporting long long.
-//  fmt::ULongLong(1000000000) * fmt::ULongLong(1000000000) * 10
-//};	
-//	return values;
-//}
-
-static const char *DIGITS()
-{
-	static const char values[] =
-    "0001020304050607080910111213141516171819"
-    "2021222324252627282930313233343536373839"
-    "4041424344454647484950515253545556575859"
-    "6061626364656667686970717273747576777879"
-    "8081828384858687888990919293949596979899";
-	return values;
-}
-
-};
-
 template <typename Char>
 class FormatterProxy;
 
@@ -395,11 +395,6 @@ class BasicStringRef {
 typedef BasicStringRef<char> StringRef;
 typedef BasicStringRef<wchar_t> WStringRef;
 
-class FormatError : public std::runtime_error {
- public:
-  explicit FormatError(const std::string &message)
-  : std::runtime_error(message) {}
-};
 
 enum Alignment {
   ALIGN_DEFAULT, ALIGN_LEFT, ALIGN_RIGHT, ALIGN_CENTER, ALIGN_NUMERIC
@@ -967,19 +962,20 @@ BasicFormatter<Char> BasicWriter<Char>::Format(StringRef format) {
 typedef BasicWriter<char> Writer;
 typedef BasicWriter<wchar_t> WWriter;
 
+
 // The default formatting function.
-template <typename Char, typename T>
-void Format(BasicWriter<Char> &w, const FormatSpec &spec, const T &value) {
-  std::basic_ostringstream<Char> os;
-  os << value.ToString();
-  w.Write(os.str(), spec);
+template <typename XChar, typename T>
+void Format(BasicWriter<XChar> &w, const FormatSpec &spec, const T &value) 
+{
+	w.Write(value.ToString().Tostdwstring().c_str(), spec);
 }
+
 
 namespace internal {
 // Formats an argument of a custom type, such as a user-defined class.
-template <typename Char, typename T>
+template <typename XChar, typename T>
 void FormatCustomArg(
-    BasicWriter<Char> &w, const void *arg, const FormatSpec &spec) {
+    BasicWriter<XChar> &w, const void *arg, const FormatSpec &spec) {
   Format(w, spec, *static_cast<const T*>(arg));
 }
 }
@@ -993,10 +989,10 @@ void FormatCustomArg(
   the output is sent to a :cpp:class:`fmt::Writer` object.
   \endrst
  */
-template <typename Char>
+template <typename XChar>
 class BasicFormatter {
  private:
-  BasicWriter<Char> *writer_;
+  BasicWriter<XChar> *writer_;
 
   enum Type {
     // Numeric types should go first.
@@ -1006,7 +1002,7 @@ class BasicFormatter {
   };
 
   typedef void (*FormatFunc)(
-      BasicWriter<Char> &w, const void *arg, const FormatSpec &spec);
+      BasicWriter<XChar> &w, const void *arg, const FormatSpec &spec);
 
   // A format argument.
   class Arg {
@@ -1022,7 +1018,7 @@ class BasicFormatter {
     Arg(T *value);
 
     struct StringValue {
-      const Char *value;
+      const XChar *value;
       std::size_t size;
     };
 
@@ -1064,15 +1060,15 @@ class BasicFormatter {
     : type(LONG_DOUBLE), long_double_value(value), formatter(0) {}
     Arg(char value) : type(CHAR), int_value(value), formatter(0) {}
     Arg(wchar_t value)
-    : type(CHAR), int_value(internal::CharTraits<Char>::ConvertChar(value)),
+    : type(CHAR), int_value(internal::CharTraits<XChar>::ConvertChar(value)),
       formatter(0) {}
 
-    Arg(const Char *value) : type(STRING), formatter(0) {
+    Arg(const XChar *value) : type(STRING), formatter(0) {
       string.value = value;
       string.size = 0;
     }
 
-    Arg(Char *value) : type(STRING), formatter(0) {
+    Arg(XChar *value) : type(STRING), formatter(0) {
       string.value = value;
       string.size = 0;
     }
@@ -1082,12 +1078,12 @@ class BasicFormatter {
 
     Arg(void *value) : type(POINTER), pointer_value(value), formatter(0) {}
 
-    Arg(const std::basic_string<Char> &value) : type(STRING), formatter(0) {
+    Arg(const std::basic_string<XChar> &value) : type(STRING), formatter(0) {
       string.value = value.c_str();
       string.size = value.size();
     }
 
-    Arg(BasicStringRef<Char> value) : type(STRING), formatter(0) {
+    Arg(BasicStringRef<XChar> value) : type(STRING), formatter(0) {
       string.value = value.c_str();
       string.size = value.size();
     }
@@ -1095,7 +1091,7 @@ class BasicFormatter {
     template <typename T>
     Arg(const T &value) : type(CUSTOM), formatter(0) {
       custom.value = &value;
-      custom.format = &internal::FormatCustomArg<Char, T>;
+      custom.format = &internal::FormatCustomArg<XChar, T>;
     }
 
     ~Arg() FMT_NOEXCEPT(false) {
@@ -1118,11 +1114,11 @@ class BasicFormatter {
   enum { NUM_INLINE_ARGS = 10 };
   internal::Array<const Arg*, NUM_INLINE_ARGS> args_;  // Format arguments.
 
-  const Char *format_;  // Format string.
+  const XChar *format_;  // Format string.
   int num_open_braces_;
   int next_arg_index_;
 
-  friend class internal::FormatterProxy<Char>;
+  friend class internal::FormatterProxy<XChar>;
 
   // Forbid copying from a temporary as in the following example:
   //   fmt::Formatter<> f = Format("test"); // not allowed
@@ -1132,14 +1128,14 @@ class BasicFormatter {
   BasicFormatter(const BasicFormatter &);
   BasicFormatter& operator=(const BasicFormatter &);
 
-  void ReportError(const Char *s, StringRef message) const;
+  void ReportError(const XChar *s, StringRef message) const;
 
-  unsigned ParseUInt(const Char *&s) const;
+  unsigned ParseUInt(const XChar *&s) const;
 
   // Parses argument index and returns an argument with this index.
-  const Arg &ParseArgIndex(const Char *&s);
+  const Arg &ParseArgIndex(const XChar *&s);
 
-  void CheckSign(const Char *&s, const Arg &arg);
+  void CheckSign(const XChar *&s, const Arg &arg);
 
   // Parses the format string and performs the actual formatting,
   // writing the output to writer_.
@@ -1153,15 +1149,15 @@ class BasicFormatter {
   }
 
   struct Proxy {
-    BasicWriter<Char> *writer;
-    const Char *format;
+    BasicWriter<XChar> *writer;
+    const XChar *format;
 
-    Proxy(BasicWriter<Char> *w, const Char *fmt) : writer(w), format(fmt) {}
+    Proxy(BasicWriter<XChar> *w, const XChar *fmt) : writer(w), format(fmt) {}
   };
 
  protected:
-  const Char *TakeFormatString() {
-    const Char *format = this->format_;
+  const XChar *TakeFormatString() {
+    const XChar *format = this->format_;
     this->format_ = 0;
     return format;
   }
@@ -1174,13 +1170,13 @@ class BasicFormatter {
  public:
   // Constructs a formatter with a writer to be used for output and a format
   // string.
-  BasicFormatter(BasicWriter<Char> &w, const Char *format = 0)
+  BasicFormatter(BasicWriter<XChar> &w, const XChar *format = 0)
   : writer_(&w), format_(format) {}
 
 #if FMT_USE_INITIALIZER_LIST
   // Constructs a formatter with formatting arguments.
-  BasicFormatter(BasicWriter<Char> &w,
-      const Char *format, std::initializer_list<Arg> args)
+  BasicFormatter(BasicWriter<XChar> &w,
+      const XChar *format, std::initializer_list<Arg> args)
   : writer_(&w), format_(format) {
     // TODO: don't copy arguments
     args_.reserve(args.size());
@@ -1206,8 +1202,8 @@ class BasicFormatter {
     return *this;
   }
 
-  operator internal::FormatterProxy<Char>() {
-    return internal::FormatterProxy<Char>(this);
+  operator internal::FormatterProxy<XChar>() {
+    return internal::FormatterProxy<XChar>(this);
   }
 
   operator StringRef() {
@@ -1216,25 +1212,25 @@ class BasicFormatter {
   }
 };
 
-template <typename Char>
-inline std::basic_string<Char> str(const BasicWriter<Char> &f) {
+template <typename XChar>
+inline std::basic_string<XChar> str(const BasicWriter<XChar> &f) {
   return f.str();
 }
 
-template <typename Char>
-inline const Char *c_str(const BasicWriter<Char> &f) { return f.c_str(); }
+template <typename XChar>
+inline const XChar *c_str(const BasicWriter<XChar> &f) { return f.c_str(); }
 
 namespace internal {
 
-template <typename Char>
+template <typename XChar>
 class FormatterProxy {
  private:
-  BasicFormatter<Char> *formatter_;
+  BasicFormatter<XChar> *formatter_;
 
  public:
-  explicit FormatterProxy(BasicFormatter<Char> *f) : formatter_(f) {}
+  explicit FormatterProxy(BasicFormatter<XChar> *f) : formatter_(f) {}
 
-  BasicWriter<Char> *Format() {
+  BasicWriter<XChar> *Format() {
     formatter_->CompleteFormatting();
     return formatter_->writer_;
   }
@@ -1270,8 +1266,8 @@ inline const wchar_t *c_str(internal::FormatterProxy<wchar_t> p) {
 class NoAction {
  public:
   /** Does nothing. */
-  template <typename Char>
-  void operator()(const BasicWriter<Char> &) const {}
+  template <typename XChar>
+  void operator()(const BasicWriter<XChar> &) const {}
 };
 
 /**
@@ -1298,10 +1294,10 @@ class NoAction {
     ReportError("File not found: {}") << path;
   \endrst
  */
-template <typename Action = NoAction, typename Char = char>
-class Formatter : private Action, public BasicFormatter<Char> {
+template <typename Action = NoAction, typename XChar = char>
+class Formatter : private Action, public BasicFormatter<XChar> {
  private:
-  BasicWriter<Char> writer_;
+  BasicWriter<XChar> writer_;
   bool inactive_;
 
   // Forbid copying other than from a temporary. Do not implement.
@@ -1318,13 +1314,13 @@ class Formatter : private Action, public BasicFormatter<Char> {
     examples of action classes.
     \endrst
   */
-  explicit Formatter(BasicStringRef<Char> format, Action a = Action())
-  : Action(a), BasicFormatter<Char>(writer_, format.c_str()),
+  explicit Formatter(BasicStringRef<XChar> format, Action a = Action())
+  : Action(a), BasicFormatter<XChar>(writer_, format.c_str()),
     inactive_(false) {
   }
 
   Formatter(Formatter &f)
-  : Action(f), BasicFormatter<Char>(writer_, f.TakeFormatString()),
+  : Action(f), BasicFormatter<XChar>(writer_, f.TakeFormatString()),
     inactive_(false) {
     f.inactive_ = true;
   }
@@ -1433,8 +1429,8 @@ inline void FormatDec(char *&buffer, T value) {
       return;
     }
     unsigned index = static_cast<unsigned>(abs_value * 2);
-    *buffer++ = internal::DIGITS[index];
-    *buffer++ = internal::DIGITS[index + 1];
+    *buffer++ = internal::Constants::DIGITS()[index];
+    *buffer++ = internal::Constants::DIGITS()[index + 1];
     return;
   }
   unsigned num_digits = internal::CountDigits(abs_value);
@@ -1549,18 +1545,33 @@ static inline int SignBit(double value)
 {
   if (value < 0) return 1;
   if (value == value) return 0;
+#if _WIN32
   int dec = 0, sign = 0;
   char buffer[2];  // The buffer size must be >= 2 or _ecvt_s will fail.
   _ecvt_s(buffer, sizeof(buffer), value, 0, &dec, &sign);
   return sign;
+#else
+  return 0;
+#endif
 }
 
-static inline int IsInf(double x) { return !_finite(x); }
+static inline int IsInf(double x) 
+{ 
+#if _WIN32
+  return !_finite(x); 
+#else
+  return !__finite(x);
+#endif
+}
 
 static inline int FMT_SNPRINTF(char *buffer, size_t size, const char *format, ...) {
   va_list args;
   va_start(args, format);
+#if _WIN32
   int result = vsnprintf_s(buffer, size, _TRUNCATE, format, args);
+#else
+  int result = vsnprintf(buffer, size, format, args);
+#endif
   va_end(args);
   return result;
 }
@@ -1598,29 +1609,6 @@ int XTSystem_fmt::internal::CharTraits<wchar_t>::FormatFloat(
       swprintf(buffer, size, format, width, value) :
       swprintf(buffer, size, format, width, precision, value);
 }
-
-namespace XTSystem_fmt
-{
-	namespace internal
-	{
-		struct Internal
-		{
-			static void ReportUnknownType(char code, const char *type)
-			{
-			  if (std::isprint(static_cast<unsigned char>(code))) {
-				throw XTSystem_fmt::FormatError(XTSystem_fmt::str(
-					XTSystem_fmt::Format("unknown format code '{}' for {}") << code << type));
-			  }
-			  throw XTSystem_fmt::FormatError(
-				  XTSystem_fmt::str(XTSystem_fmt::Format("unknown format code '\\x{:02x}' for {}")
-					<< static_cast<unsigned>(code) << type));
-			}
-
-		};
-	}
-}
-
-
 
 
 // Fills the padding around the content and returns the pointer to the

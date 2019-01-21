@@ -99,6 +99,8 @@ namespace XTSystem
 						public: typedef typename T_Arr::const_iterator const_iterator;
 						public: iterator begin() { return m_vecValues.begin(); }
 						public: iterator end() { return m_vecValues.end(); }
+						public: const_iterator cbegin() const { return m_vecValues.cbegin(); }
+						public: const_iterator cend() const { return m_vecValues.cend(); }
 				};
 
 
@@ -125,31 +127,31 @@ namespace XTSystem
 
 					public: std::list<TKey> Keys()
 						    {
-                                T_mapType::const_iterator b = m_map.begin();
-                                T_mapType::const_iterator e = m_map.end();
+                                typename T_mapType::const_iterator b = m_map.begin();
+                                typename T_mapType::const_iterator e = m_map.end();
                                 std::list<TKey> lst;
-                                for (T_mapType::const_iterator it = b; it != e; it++) lst.push_back(it->first);
+                                for (typename T_mapType::const_iterator it = b; it != e; it++) lst.push_back(it->first);
 							    return lst;
 						    }
 
                     public: std::list<TValue> Values()
                             {
-                                T_mapType::const_iterator b = m_map.begin();
-                                T_mapType::const_iterator e = m_map.end();
+                                typename T_mapType::const_iterator b = m_map.begin();
+                                typename T_mapType::const_iterator e = m_map.end();
                                 std::list<TValue> lst;
-                                for (T_mapType::const_iterator it = b; it != e; it++) lst.push_back(it->second);
+                                for (typename T_mapType::const_iterator it = b; it != e; it++) lst.push_back(it->second);
                                 return lst;
                             }
 
                             public: TValue &operator[](const TKey &key)
                             {
-                                T_mapType::iterator it = m_map.find(key);
+                                typename T_mapType::iterator it = m_map.find(key);
                                 if (it == m_map.end()) throw Exception(_T("Item not in dictionary"));
                                 return it->second;
                             }
                             public: const TValue &operator[](const TKey &key) const
                             {
-                                T_mapType::const_iterator it = m_map.find(key);
+                                typename T_mapType::const_iterator it = m_map.find(key);
                                 if (it == m_map.end()) throw Exception(_T("Item not in dictionary"));
                                 return it->second;
                             }

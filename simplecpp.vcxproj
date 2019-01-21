@@ -171,7 +171,7 @@
     <ClInclude Include="XTSystem_14ioDirectory.h" />
     <ClInclude Include="XTSystem_15xml.h" />
     <ClInclude Include="XTSystem_16enums.h" />
-    <ClInclude Include="XTSystem_17generics.h" />
+    <ClInclude Include="XTSystem_09generics.h" />
     <ClInclude Include="XTSystem_18registry.h" />
     <ClInclude Include="XTSystem_19DateTime.h" />
     <ClInclude Include="XTSystem_20process.h" />

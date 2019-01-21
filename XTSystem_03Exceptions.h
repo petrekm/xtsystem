@@ -1,5 +1,6 @@
 
-
+#ifdef XTSYSTEM_EXCEPTIONS_WITH_CALLSTACK
+#ifdef _WIN32
 namespace XTSystem
 {
     namespace Stack 
@@ -14,7 +15,7 @@ namespace XTSystem
               //stacktrace += L"xxx\n";
               //return;
 
-                String line = String::Convert_charsToString(szText);
+                String line = szText;
 
                 switch (state)
                 {
@@ -43,6 +44,8 @@ namespace XTSystem
 
     }
 }
+#endif
+#endif
 
 namespace XTSystem
 {
@@ -56,18 +59,22 @@ namespace XTSystem
             {
                 Message = message;
 #ifdef XTSYSTEM_EXCEPTIONS_WITH_CALLSTACK
+#ifdef _WIN32
                 Stack::ExceptionStackWalker sw;
                 sw.ShowCallstack();
                 StackTrace = sw.StackTrace();
+#endif
 #endif
             }
             Exception(const Char *message)
             {
                 Message = message;
 #ifdef XTSYSTEM_EXCEPTIONS_WITH_CALLSTACK
+#ifdef _WIN32
                 Stack::ExceptionStackWalker sw;
                 sw.ShowCallstack();
                 StackTrace = sw.StackTrace();
+#endif
 #endif
             }
 

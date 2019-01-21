@@ -1,4 +1,23 @@
 
+
+#include <string>
+#include <sstream>
+#include <vector>
+
+#ifndef _WIN32
+
+#include <wchar.h>
+#pragma warning(push)
+#pragma warning(disable:4996)
+#define _T(X) L"" X
+
+#define TCHAR wchar_t
+#define _tcsicmp wcsicmp
+#define _tcscmp wcscmp
+#define _tcslen wcslen
+#endif
+
+
 namespace XTSystem
 {
     //enum_2(StringSplitOptions,None,RemoveEmptyEntries);
@@ -22,10 +41,88 @@ namespace XTSystem
 	typedef TCHAR Char;
 class String
 {
+#ifdef _WIN32
+	private: static std::wstring widen(const std::string& str)
+	{
+		const char*p = str.c_str();
+		if (NULL == p) return _T("");
+		const WCHAR *pwcsName;
+		int nChars = MultiByteToWideChar(CP_ACP, 0, p, -1, NULL, 0);
+		pwcsName = new WCHAR[nChars];
+		MultiByteToWideChar(CP_ACP, 0, p, -1, (LPWSTR)pwcsName, nChars);
+		std::wstring s(pwcsName);
+		delete[] pwcsName;
+		return s;
+
+	}
+
+	private: static std::string narrow(const std::wstring& str)
+	{
+		const TCHAR*p = str.c_str();
+		if (NULL == p) return "";
+		const char *pcsName;
+		int nChars = WideCharToMultiByte(CP_ACP, 0, p, -1, NULL, 0, NULL, NULL);
+		pcsName = new char[nChars];
+		WideCharToMultiByte(CP_ACP, 0, p, -1, (LPSTR)pcsName, nChars, NULL, NULL);
+		std::string s(pcsName);
+		delete[] pcsName;
+		return s;
+	}
+
+#else
+private: static int wcsicmp(const TCHAR* cs,const TCHAR * ct)
+	 {
+	     while (tolower(*cs) == tolower(*ct))
+	     {
+		 if (*cs == 0)
+		     return 0;
+		 cs++;
+		 ct++;
+	     }
+	     return tolower(*cs) - tolower(*ct);
+	 }
+private: static std::wstring widen( const std::string& str )
+	{
+
+            int n = str.size();
+            if (n<=0) return L"";
+            
+			TCHAR* buf = new TCHAR[n+1];
+            int rtn_val = mbstowcs(buf, str.c_str(),n);
+            buf[n] = 0;
+            std::wstring x;
+            x = buf;
+            delete buf;
+            return x;
+
+	}
+private: static std::string narrow( const std::wstring& str )
+{
+
+            int n = str.size();
+            if (n<=0) return "";
+            
+            char* buf = new char[n+1];
+            int rtn_val = wcstombs(buf, str.c_str(),n);
+            buf[n] = 0;
+            std::string x;
+            
+            x = buf;
+            delete buf;
+            return x;
+
+}
+#endif
+
 public:
     String():data() {}
     String(const String &s):data(s.data) {}
     String(const Char *s):data(s) {}
+    String(const char *s): data()
+    {
+		std::string ss(s);
+		data = widen(ss);
+    }
     static String FromWstring(const std::wstring &s) { String ss; ss.data = s; return ss; }
 
     int Length() const { return (int)data.size(); }
@@ -71,8 +168,10 @@ public:
     String& operator=(const String& inString) { data = inString.data; return *this;}
     String& operator=(const std::wstring& inString) { data = inString; return *this;}
     String& operator=(const Char* const inString) { data = inString; return *this;}
+    String& operator=(const char* const inString) { std::string ss(inString); data = widen(ss); return *this;}
     String& operator+=(const String & inString) { data += inString.data; return *this; }
     String& operator+=(Char inChar) { data += inChar; return *this; }
+
 
     operator const std::wstring &() const { return data; }
     operator const Char*() const { return data.c_str(); }
@@ -91,22 +190,22 @@ public:
     TEMP_ARG_9 static String Format(const String &s, TCREF_ARG_9) { String res; res.data = XTSystem_fmt::Format(s.data, ARG_9); return res; }
     TEMP_ARG_10 static String Format(const String &s, TCREF_ARG_10) { String res; res.data = XTSystem_fmt::Format(s.data, ARG_10); return res; }
 
-private:
-        static inline std::wstring &ltrim(std::wstring &s, const Char*chars = _T(" \t\n\r\v"))
+
+		private: static inline std::wstring &ltrim(std::wstring &s, const Char*chars = _T(" \t\n\r\v"))
         {
             std::wstring::size_type loc = s.find_first_not_of(chars);
             if (loc != std::wstring::npos) s = s.substr(loc); else { s = _T(""); }
             return s;
         }
 
-        static inline std::wstring &rtrim(std::wstring &s, const Char*chars = _T(" \t\n\r\v"))
+		private: static inline std::wstring &rtrim(std::wstring &s, const Char*chars = _T(" \t\n\r\v"))
         {
             std::wstring::size_type loc = s.find_last_not_of(chars);
             if (loc != std::wstring::npos) s = s.substr(0, loc + 1); else { s = _T(""); }
             return s;
         }
 
-        static inline std::wstring &trim(std::wstring &s) 
+		private: static inline std::wstring &trim(std::wstring &s)
         {
             return ltrim(rtrim(s));
         }
@@ -153,17 +252,21 @@ private:
     public: String ToLower() const
             {
                 String s(*this);
-                transform(s.data.begin(), s.data.end(),s.data.begin(),tolower);
+                //transform(s.data.begin(), s.data.end(),s.data.begin(),tolower);
+				size_t n = s.data.size();
+				for (size_t i = 0; i < n; i++) s.data[i] = tolower(s.data[i]);
                 return s;
             }
     public: String ToUpper() const
             {
                 String s(*this);
-                transform(s.data.begin(), s.data.end(),s.data.begin(),toupper);
+                //transform(s.data.begin(), s.data.end(),s.data.begin(),toupper);
+				size_t n = s.data.size();
+				for (size_t i = 0; i < n; i++) s.data[i] = toupper(s.data[i]);
                 return s;
             }
 
-            String Insert(int startIndex, const String &value) const
+	public: String Insert(int startIndex, const String &value) const
             {
                 String s(*this);
                 s.data.insert(startIndex,value.data);
@@ -178,7 +281,7 @@ private:
 
     public: String PadLeft(int totalWidth) const
             {
-                return PadLeft(totalWidth,_T(' '));
+                return PadLeft(totalWidth,L' ');
             }
 
             String PadLeft(int totalWidth, Char paddingChar) const
@@ -191,7 +294,7 @@ private:
 
             String PadRight(int totalWidth) const
             {
-                return PadRight(totalWidth,_T(' '));
+                return PadRight(totalWidth,L' ');
             }
 
             String PadRight(int totalWidth, Char paddingChar) const
@@ -369,7 +472,12 @@ private:
             String Replace(Char oldChar, Char newChar)
             {
                 String s(*this);
-                std::replace( s.data.begin(), s.data.end(), oldChar, newChar);
+                //std::replace( s.data.begin(), s.data.end(), oldChar, newChar);
+				size_t n = s.data.size();
+				for (size_t i = 0; i < n; i++)
+				{
+					if (s.data[i] == oldChar) s.data[i] = newChar;
+				}
                 return s;
             }
 
@@ -387,30 +495,16 @@ private:
                 return s;
             }
 
-            static String Convert_charsToString(const char*p)
-            {
-                if (NULL == p) return L"";
-                const WCHAR *pwcsName;
-                int nChars = MultiByteToWideChar(CP_ACP, 0, p, -1, NULL, 0);
-                pwcsName = new WCHAR[nChars];
-                MultiByteToWideChar(CP_ACP, 0, p, -1, (LPWSTR)pwcsName, nChars);
-                String s(pwcsName);
-                delete [] pwcsName;
-                return s;
-            }
-
 			std::string Tostdstring() const
 			{
-				std::string strValue;
-				strValue.assign(data.begin(), data.end());  // convert wstring to string
-				return strValue;
-			}
+				return narrow(data);
+            }
 
-    friend std::basic_ostringstream<Char>&operator<<(std::basic_ostringstream<Char> &os, const String &d)
-    {
-        os << d.data;
-        return os;
-    }
+	std::wstring Tostdwstring() const
+	{
+		return data;
+	}
+
 
     friend String operator+(const String& A,const String& B)
     {
@@ -446,10 +540,21 @@ private:
     friend bool operator>= (const Char*   lhs, const String& rhs) { return rhs.data.compare(lhs)<=0; }
     friend bool operator>= (const String& lhs, const Char*   rhs) { return lhs.data.compare(rhs)>=0; }
 
+
+	//friend std::basic_ostringstream<Char>&operator<<(std::basic_ostringstream<Char> &os, const String &d)
+	//{
+	//	os << d.data;
+	//	return os;
+	//}
+
 private:
     std::wstring data;
 };
 
 
 }
+
+#ifndef _WIN32
+	#pragma warning(pop)
+#endif
 
