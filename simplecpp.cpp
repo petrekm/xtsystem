@@ -410,8 +410,8 @@ void HResultsDemo()
         ,E_OUTOFMEMORY
         ,E_POINTER
         ,E_UNEXPECTED
-        , 0x80040810
-        , 0x80040841
+        , _HRESULT_TYPEDEF_(0x80040810)
+        , _HRESULT_TYPEDEF_(0x80040841)
     };
 
     for (int i = 0; i < ARR_SIZE(hrs); i++)

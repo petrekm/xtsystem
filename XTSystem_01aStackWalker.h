@@ -692,7 +692,7 @@ protected:
   virtual void OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName)
     {
       CHAR buffer[STACKWALK_MAX_NAMELEN];
-      _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%ws', symOptions: %d, UserName: '%ws'\n", szSearchPath, symOptions, szUserName);
+      _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%s', symOptions: %d, UserName: '%s'\n", szSearchPath, symOptions, szUserName);
       OnOutput(buffer);
       // Also display the OS-version
     #if _MSC_VER <= 1200

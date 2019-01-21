@@ -5,7 +5,7 @@ using namespace Stack;
 
 void ProcessInfoDemo()
 {
-    ProcessInfo pi;
+    //ProcessInfo pi;
 }
 
 
